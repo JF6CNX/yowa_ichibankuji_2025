@@ -8,314 +8,163 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     
     <style>
-        /* --- デザイン変数 --- */
         :root {
             --primary: #E60012;
             --text-main: #333;
             --bg-body: #FAFAFA;
-            --rank-a: #E60012; --rank-b: #0078D7; --rank-c: #009E25; --rank-d: #FF9800;
+            --rank-s: #9610f0; --rank-a: #E60012; --rank-b: #0078D7; --rank-c: #009E25; --rank-d: #FF9800;
             --font-jp: 'Noto Sans JP', sans-serif;
             --font-en: 'Roboto', sans-serif;
             --gold: #D4AF37;
         }
 
-        body {
-            font-family: var(--font-jp); background-color: var(--bg-body); color: var(--text-main);
-            margin: 0; padding-bottom: 140px; overflow-x: hidden;
-        }
+        body { font-family: var(--font-jp); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding-bottom: 140px; overflow-x: hidden; }
         *, *::before, *::after { box-sizing: border-box; }
         img { width: 100%; display: block; }
-        button { cursor: pointer; outline: none; font-family: inherit; }
+        button { cursor: pointer; outline: none; font-family: inherit; border: none; }
 
         /* ▼ オープニング ▼ */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.8s ease, visibility 0.8s ease; /* フェードアウトを少しゆっくりに */
+            transition: opacity 0.8s ease, visibility 0.8s ease;
         }
         .splash-logo { width: 60%; max-width: 500px; opacity: 0; animation: fadeUp 0.8s forwards; }
-        .splash-text { margin-top: 15px; font-family: var(--font-en); color: #999; letter-spacing: 3px; opacity: 0; animation: fadeUp 0.8s 0.2s forwards; font-weight: bold; }
         #splash-screen.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ▼ ヘッダー ▼ */
+        /* ▼ コンテンツ ▼ */
         header { width: 100%; background: #000; }
-        .key-visual-img { width: 100%; height: auto; }
-
-        /* ▼ コンテンツ共通 ▼ */
         .container { max-width: 1100px; margin: 0 auto; padding: 60px 20px; }
-        .section-title {
-            text-align: center; font-family: var(--font-en); font-size: 2.2rem; font-weight: 900;
-            margin-bottom: 50px; position: relative; padding-bottom: 15px; letter-spacing: 0.05em;
-        }
-        .section-title::after {
-            content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 50px; height: 4px; background: var(--primary);
-        }
-        .fade-in-section { opacity: 0; transform: translateY(20px); transition: 1s ease; }
-        body.loaded .fade-in-section { opacity: 1; transform: translateY(0); }
-
-        /* ▼ INFORMATION ▼ */
-        .about-section { max-width: 800px; margin: 0 auto 60px; padding: 0 20px; text-align: center; }
-        .about-text { text-align: left; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .section-title { text-align: center; font-family: var(--font-en); font-size: 2.2rem; font-weight: 900; margin-bottom: 50px; position: relative; padding-bottom: 15px; }
+        .section-title::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 50px; height: 4px; background: var(--primary); }
 
         /* ▼ GALLERY ▼ */
-        .gallery-container { width: 100%; overflow: hidden; padding-bottom: 40px; }
         .swiper { width: 100%; padding: 40px 0 60px; }
-        .swiper-slide {
-            background: #fff; width: 300px; height: 300px; border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15); overflow: hidden;
-        }
-        .gallery-img { width: 100%; height: 100%; object-fit: cover; }
-        .gallery-badge {
-            position: absolute; top: 0; left: 0; background: var(--primary); color: white;
-            padding: 6px 18px; font-family: var(--font-en); font-weight: 900; font-size: 1.1rem;
-            border-bottom-right-radius: 15px; z-index: 10;
-        }
-        .swiper-button-next, .swiper-button-prev {
-            color: #333; background: rgba(255,255,255,0.9); width: 50px; height: 50px; border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .swiper-button-next:after, .swiper-button-prev:after { font-size: 20px; font-weight: bold; }
+        .swiper-slide { background: #fff; width: 300px; height: 300px; border-radius: 15px; box-shadow: 0 15px 30px rgba(0,0,0,0.15); overflow: hidden; position: relative; }
+        .gallery-badge { position: absolute; top: 0; left: 0; background: var(--primary); color: white; padding: 6px 18px; font-weight: 900; z-index: 10; border-bottom-right-radius: 15px; }
 
-        /* ▼ LINEUP LIST ▼ */
+        /* ▼ LINEUP ▼ */
         .lineup-list { display: flex; flex-direction: column; gap: 30px; }
-        .lineup-item {
-            display: flex; background: #fff; border-radius: 16px; overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; transition: transform 0.2s;
-        }
-        .lineup-item:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .lineup-item[data-rank="A"] { border-left: 10px solid var(--rank-a); }
-        .lineup-item[data-rank="B"] { border-left: 10px solid var(--rank-b); }
-        .lineup-item[data-rank="C"] { border-left: 10px solid var(--rank-c); }
-        .lineup-item[data-rank="D"] { border-left: 10px solid var(--rank-d); }
-        .item-img-box { width: 320px; height: 320px; flex-shrink: 0; background: #f4f4f4; position: relative; }
-        .item-img { width: 100%; height: 100%; object-fit: cover; }
-        .item-info { flex: 1; padding: 30px; display: flex; flex-direction: column; justify-content: center; }
-        .item-rank { font-family: var(--font-en); font-weight: 900; font-size: 1.8rem; margin-bottom: 10px; }
-        .item-name { font-weight: 700; font-size: 1.6rem; margin-bottom: 15px; line-height: 1.3; }
-        .item-desc { font-size: 1rem; color: #666; line-height: 1.6; }
-        .item-status { width: 140px; display: flex; align-items: center; justify-content: center; border-left: 1px solid #eee; }
-        .status-badge { font-size: 1rem; padding: 8px 20px; background: #eee; border-radius: 50px; color: #555; font-weight: bold; }
-        .is-soldout { opacity: 0.6; filter: grayscale(100%); }
-        .is-soldout .status-badge { background: #333; color: #fff; }
+        .lineup-item { display: flex; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 10px solid #eee; transition: 0.2s; }
+        .lineup-item[data-rank="S"] { border-left-color: var(--rank-s); }
+        .lineup-item[data-rank="A"] { border-left-color: var(--rank-a); }
+        .lineup-item[data-rank="B"] { border-left-color: var(--rank-b); }
+        .lineup-item[data-rank="C"] { border-left-color: var(--rank-c); }
+        .lineup-item[data-rank="D"] { border-left-color: var(--rank-d); }
+        .item-img-box { width: 300px; height: 300px; flex-shrink: 0; position: relative; }
+        .item-info { flex: 1; padding: 30px; }
+        .is-soldout { opacity: 0.5; filter: grayscale(1); }
 
-        /* ▼ 外部リンクボタン ▼ */
+        /* ▼ よわ美術館ボタン ▼ */
         .btn-external-wrap { text-align: center; margin: 60px 0; }
-        .btn-external {
-            display: inline-block; padding: 20px 80px; background: #111; color: #fff;
-            border-radius: 50px; font-weight: bold; font-size: 1.1rem; transition: 0.3s;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+        .btn-external { display: inline-block; padding: 20px 80px; background: #111; color: #fff; border-radius: 50px; font-weight: bold; text-decoration: none; transition: 0.3s; }
         .btn-external:hover { background: var(--primary); transform: translateY(-3px); }
 
         /* ▼ プレイバー ▼ */
-        .play-bar {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 600px; z-index: 100;
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            padding: 12px 30px; border-radius: 60px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2); border: 1px solid rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .status-box { font-weight: bold; color: #555; }
-        .status-num { font-family: var(--font-en); font-size: 1.8rem; color: var(--primary); margin-left: 5px; }
-        .btn-draw {
-            background: linear-gradient(135deg, #FF6B6B, #E60012);
-            color: white; border: none; padding: 15px 50px; border-radius: 30px;
-            font-weight: bold; font-size: 1.2rem; box-shadow: 0 5px 15px rgba(230,0,18,0.4);
-            transition: 0.2s;
-        }
-        .btn-draw:hover { transform: scale(1.05); }
-        .btn-draw:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+        .play-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 600px; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 15px 40px; border-radius: 60px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; }
+        .btn-draw { background: linear-gradient(135deg, #FF6B6B, #E60012); color: white; padding: 15px 50px; border-radius: 30px; font-weight: 900; font-size: 1.2rem; }
 
-
-        /* ▼▼▼ 抽選モーダル ▼▼▼ */
-        .modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); z-index: 2000;
-            justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;
-        }
-        .modal-overlay.is-open { opacity: 1; }
-
-        .lottery-stage { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden; }
-
-        .god-rays {
-            position: absolute; top: 50%; left: 50%; width: 150vmax; height: 150vmax;
-            background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.08) 0deg 10deg, transparent 10deg 20deg);
-            transform: translate(-50%, -50%); animation: rotateRays 30s linear infinite;
-            pointer-events: none;
-        }
-        @keyframes rotateRays { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
-
-        /* 1. チケット選択画面 */
-        .selection-container {
-            display: flex; gap: 20px; z-index: 10; flex-wrap: wrap; justify-content: center;
-            perspective: 1000px;
-        }
-        .select-title {
-            position: absolute; top: 15%; width: 100%; text-align: center;
-            color: white; font-size: 1.8rem; font-weight: 900; letter-spacing: 2px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-
-        .mystery-ticket {
-            width: 100px; height: 160px;
-            background-color: #222; /* 画像ロード前の背景 */
-            background-size: cover; background-position: center;
-            border: 2px solid var(--gold);
-            border-radius: 8px; cursor: pointer;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            position: relative; overflow: hidden;
-        }
-        .mystery-ticket:hover { transform: translateY(-15px) scale(1.05); box-shadow: 0 0 30px rgba(212, 175, 55, 0.8); border-color: #fff; }
-        .mystery-ticket.is-selected {
-            transform: scale(1.5) rotateY(360deg); z-index: 100;
-            border-color: #fff; transition: 0.8s;
-        }
-        .mystery-ticket.is-faded { opacity: 0; transform: scale(0); pointer-events: none; }
-
-
-        /* 2. 爆発エフェクト */
-        .explosion-flash {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; pointer-events: none; z-index: 50;
-        }
-        .do-explode { animation: explodeAnim 0.5s ease-out forwards; }
-        @keyframes explodeAnim { 0% { opacity: 1; } 100% { opacity: 0; } }
-
-        /* 3. 結果表示 */
-        .result-container {
-            display: none; text-align: center; color: white; position: relative; z-index: 20;
-            animation: slideUpIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        /* ▼ モーダル・演出 ▼ */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 2000; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; }
+        .god-rays { display: none; position: absolute; width: 250vmax; height: 250vmax; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.08) 0deg 10deg, transparent 10deg 20deg); animation: rotateRays 30s linear infinite; pointer-events: none; }
+        @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
-        .result-rank {
-            font-family: var(--font-en); font-size: 8rem; font-weight: 900; line-height: 1;
-            margin-bottom: 20px; text-shadow: 0 0 30px currentColor;
-            animation: pulseRank 1s infinite alternate;
-        }
-        .rank-A { color: #ff3333; } .rank-B { color: #3399ff; } .rank-C { color: #33cc33; } .rank-D { color: #ffcc00; }
-        @keyframes pulseRank { from { transform: scale(1); filter: brightness(100%); } to { transform: scale(1.05); filter: brightness(130%); } }
+        .explosion-flash { position: absolute; top:0; left:0; width:100%; height:100%; background:#fff; opacity:0; pointer-events:none; z-index:100; }
+        .do-flash { animation: flashAnim 0.4s ease-out; }
+        @keyframes flashAnim { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 
-        .result-img {
-            width: 300px; height: 300px; object-fit: contain; margin: 0 auto 30px;
-            filter: drop-shadow(0 0 30px rgba(255,255,255,0.4));
+        /* カード選択 (ガビガビ修正) */
+        .mystery-ticket {
+            width: 100px; height: 160px; background-color: #fff; background-size: contain; background-repeat: no-repeat; background-position: center;
+            border: 2px solid var(--gold); border-radius: 8px; cursor: pointer; transition: 0.4s;
+            image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;
         }
-        .result-name { font-size: 1.8rem; font-weight: bold; margin-bottom: 40px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .mystery-ticket.is-selected { transform: scale(1.6) rotateY(720deg); z-index: 100; border-color: #fff; }
+        .mystery-ticket.is-faded { opacity: 0; transform: scale(0); }
 
-        .btn-close-result {
-            background: white; color: #111; padding: 15px 60px; border-radius: 50px;
-            font-weight: bold; font-size: 1.2rem; border: none; box-shadow: 0 0 20px rgba(255,255,255,0.5);
-            transition: 0.3s;
-        }
-        .btn-close-result:hover { transform: scale(1.1); box-shadow: 0 0 40px rgba(255,255,255,0.8); }
-
-        @keyframes slideUpIn { from { opacity: 0; transform: translateY(50px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        #result-container { display: none; text-align: center; color: #fff; z-index: 50; }
+        .result-rank { font-size: 7rem; font-weight: 900; margin: 0; text-shadow: 0 0 30px currentColor; }
+        .rank-S { color: var(--rank-s); } .rank-A { color: var(--rank-a); } .rank-B { color: var(--rank-b); } .rank-C { color: var(--rank-c); } .rank-D { color: var(--rank-d); }
 
         @media (max-width: 768px) {
             .lineup-item { flex-direction: column; }
-            .item-img-box { width: 100%; height: 300px; }
-            .item-status { width: 100%; border-left: none; border-top: 1px solid #eee; padding: 15px; }
-            .play-bar { width: 95%; padding: 10px 20px; }
-            .btn-draw { padding: 12px 30px; font-size: 1rem; }
-            .result-rank { font-size: 6rem; }
-            .result-img { width: 220px; height: 220px; }
-            .mystery-ticket { width: 60px; height: 100px; }
+            .item-img-box { width: 100%; height: 250px; }
+            .mystery-ticket { width: 70px; height: 112px; }
         }
     </style>
 </head>
 <body>
 
     <div id="splash-screen">
-        <img src="https://placehold.co/600x200/000/fff?text=ICHIBAN+KUJI+ONLINE+BR" alt="Logo" class="splash-logo">
-        <div class="splash-text">LOADING...</div>
+        <img src="https://placehold.co/600x200/000/fff?text=ICHIBAN+KUJI+ONLINE" class="splash-logo">
+        <div style="margin-top:20px; font-weight:bold; letter-spacing:4px; color:#999;">LOADING...</div>
     </div>
 
     <header>
-        <img src="https://placehold.co/1200x600/111/fff?text=PREMIUM+KUJI+ONLINE" alt="Main Visual" class="key-visual-img">
+        <img src="https://placehold.co/1200x600/111/fff?text=PREMIUM+KUJI+ONLINE" class="key-visual-img">
     </header>
 
     <div class="container">
-        <section class="about-section fade-in-section">
-            <h2 class="section-title">INFORMATION</h2>
-            <div class="about-text">
-                <p><strong>販売期間：</strong> 202X年12月01日(金) 12:00 〜</p>
-                <p><strong>価格：</strong> 1回 700円(税込)</p>
-                <p style="margin-top:10px; font-size:0.9rem; color:#666;">
-                    ハイクオリティなフィギュアや、ここでしか手に入らない限定グッズが盛りだくさん。<br>
-                    くじを引いて、豪華賞品をゲットしよう！
-                </p>
-            </div>
-        </section>
-
-        <section class="gallery-container fade-in-section">
+        <section class="gallery-container">
             <h2 class="section-title">GALLERY</h2>
             <div class="swiper mySwiper">
                 <div class="swiper-wrapper" id="gallery-wrapper"></div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next" style="color:#000;"></div>
+                <div class="swiper-button-prev" style="color:#000;"></div>
             </div>
         </section>
 
-        <section class="detail-list-section fade-in-section">
+        <section class="detail-list-section">
             <h2 class="section-title">LINEUP</h2>
             <div id="lineup-list" class="lineup-list"></div>
         </section>
 
-        <div class="btn-external-wrap fade-in-section">
+        <div class="btn-external-wrap">
             <a href="https://harukanndorath.wixsite.com/my-site-2/about" target="_blank" class="btn-external">よわ美術館へ</a>
         </div>
     </div>
 
     <div class="play-bar">
-        <div class="status-box">残り:<span id="total-remaining" class="status-num">0</span>枚</div>
-        <button id="draw-btn" class="btn-draw" onclick="prepareLottery()">くじを引く</button>
+        <div style="font-weight:bold;">残り:<span id="total-remaining" class="status-num">0</span>枚</div>
+        <button id="draw-btn" class="btn-draw" onclick="openLottery()">くじを引く</button>
     </div>
 
     <div id="lottery-modal" class="modal-overlay">
         <div id="flash-overlay" class="explosion-flash"></div>
         <div id="god-rays" class="god-rays"></div>
-
         <div class="lottery-stage">
-            <div id="select-title" class="select-title">CHOOSE ONE!</div>
-            <div id="selection-container" class="selection-container">
-                </div>
-
-            <div id="result-container" class="result-container">
-                <div class="result-rank" id="result-rank">A</div>
-                <img id="result-img" class="result-img" src="">
-                <div class="result-name" id="result-name">商品名</div>
-                <button class="btn-close-result" onclick="closeLotteryModal()">閉じる</button>
+            <h2 id="modal-title" style="color:#fff; margin-bottom:40px; font-size:2rem; z-index:10;">CHOOSE ONE!</h2>
+            <div id="selection-container" style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center; z-index:10;"></div>
+            
+            <div id="result-container">
+                <p class="result-rank" id="result-rank">S</p>
+                <img id="result-img" src="" style="width:300px; height:300px; object-fit:contain; margin:20px auto; filter:drop-shadow(0 0 20px rgba(255,255,255,0.5));">
+                <h3 id="result-name" style="font-size:1.8rem; margin-bottom:40px;">景品名</h3>
+                <button onclick="closeLottery()" style="background:#fff; color:#000; padding:15px 60px; border-radius:40px; font-weight:bold; font-size:1.2rem;">閉じる</button>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
     <script>
         const prizeData = [
-            { rank: 'A', name: '超ビッグぬいぐるみ', count: 2, color: 'var(--rank-a)', img: 'https://placehold.co/600x600/e60012/fff?text=A+Prize', desc: '全高約30cmのビッグサイズ！' },
-            { rank: 'B', name: '描き下ろしフィギュア', count: 4, color: 'var(--rank-b)', img: 'https://placehold.co/600x600/0078d7/fff?text=B+Prize', desc: '精巧な造形のフィギュアです。' },
-            { rank: 'C', name: 'デザインタオル', count: 12, color: 'var(--rank-c)', img: 'https://placehold.co/600x600/009e25/fff?text=C+Prize', desc: '使いやすいサイズのタオル。' },
-            { rank: 'D', name: 'ラバーチャーム', count: 24, color: 'var(--rank-d)', img: 'https://placehold.co/600x600/ff9800/fff?text=D+Prize', desc: 'カバンにつけられるチャーム。' }
+            { rank: 'S', name: 'ガチでみかんがよわのフィギュアを作る', count: 1, img: 'rank_S.png', desc: '夢の3D顕現!財布は死ぬけどおもろいのでおっけー' },
+            { rank: 'A', name: 'コースター', count: 2, img: 'rank_A.png', desc: '吸引性抜群の白雲席を使用！後ろはコルクになっているのだ' },
+            { rank: 'B', name: 'ファイル', count: 4, img: 'rank_B.png', desc: '日常使い◎' },
+            { rank: 'C', name: 'アクリルキーホルダー', count: 12, img: 'rank_C.png', desc: '毎年恒例のやつ(ランダム商品)' },
+            { rank: 'D', name: '缶バッジ', count: 24, img: 'rank_D.png', desc: '集めて君もコレクター(ランダム商品)' }
         ];
 
         let lotteryBox = [];
         let currentPrize = null;
+        const cardBackImg = 'card.png';
 
-        // ▼ カード裏面画像（URLを変更可）
-        const cardBackImageUrl = 'https://placehold.co/200x320/222/D4AF37?text=CARD+BACK';
-
-        // ページロード時の処理
         window.addEventListener('load', () => {
-            // スプラッシュスクリーンを2.5秒表示
             setTimeout(() => {
                 document.getElementById('splash-screen').classList.add('is-hidden');
-                document.body.classList.add('loaded');
-                init(); // メイン処理開始
-            }, 2500);
+                init();
+            }, 2000);
         });
 
         function init() {
@@ -335,35 +184,75 @@
         }
 
         function renderGallery() {
-            const wrapper = document.getElementById('gallery-wrapper');
-            wrapper.innerHTML = '';
-            const loopData = [...prizeData, ...prizeData, ...prizeData];
-            loopData.forEach(p => {
-                const slide = document.createElement('div');
-                slide.className = 'swiper-slide';
-                slide.innerHTML = `<div class="gallery-badge" style="background:${p.color}">${p.rank}賞</div><img src="${p.img}" class="gallery-img">`;
-                wrapper.appendChild(slide);
-            });
-            new Swiper('.mySwiper', {
-                effect: 'coverflow', grabCursor: true, centeredSlides: true, slidesPerView: 'auto',
-                coverflowEffect: { rotate: 20, stretch: 0, depth: 100, modifier: 1, slideShadows: false },
-                loop: true, autoplay: { delay: 2500, disableOnInteraction: false },
-                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-            });
-        }
+    const wrapper = document.getElementById('gallery-wrapper');
+    wrapper.innerHTML = '';
+    
+    // 表示を賑やかにするため、データを2倍にして追加
+    const galleryItems = [...prizeData, ...prizeData];
+    
+    galleryItems.forEach((p, index) => {
+        const slide = document.createElement('div');
+        slide.className = 'swiper-slide';
+        slide.innerHTML = `
+            <div class="gallery-badge" style="background:var(--rank-${p.rank.toLowerCase()})">
+                ${p.rank}賞
+            </div>
+            <img src="${p.img}" style="width:100%; height:100%; object-fit:cover;" onerror="this.src='https://placehold.co/300x300?text=No+Image'">
+        `;
+        wrapper.appendChild(slide);
+    });
+
+    // Swiperの初期化（少し遅延させてHTMLの描画を待つ）
+    setTimeout(() => {
+        new Swiper('.mySwiper', {
+            effect: 'coverflow',
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: 'auto', // CSSの.swiper-slideのwidth(300px)を参照
+            initialSlide: 0,
+            loop: true,
+            loopedSlides: 5, // ループを滑らかにする
+            speed: 800,
+            autoplay: {
+                delay: 2500,
+                disableOnInteraction: false,
+            },
+            coverflowEffect: {
+                rotate: 30,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: true,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            // モバイル対応
+            breakpoints: {
+                320: { slidesPerView: 1.2, spaceBetween: 10 },
+                768: { slidesPerView: 'auto', spaceBetween: 20 }
+            }
+        });
+    }, 100);
+}
 
         function renderLineup() {
             const list = document.getElementById('lineup-list');
             list.innerHTML = '';
             prizeData.forEach(p => {
-                const count = lotteryBox.filter(x => x.rank === p.rank).length;
+                const remains = lotteryBox.filter(x => x.rank === p.rank).length;
                 const item = document.createElement('div');
-                item.className = `lineup-item ${count===0 ? 'is-soldout' : ''}`;
-                item.setAttribute('data-rank', p.rank);
+                item.className = `lineup-item ${remains === 0 ? 'is-soldout' : ''}`;
+                item.dataset.rank = p.rank;
                 item.innerHTML = `
-                    <div class="item-img-box"><img src="${p.img}" class="item-img">${count===0 ? '<div style="position:absolute;inset:0;background:rgba(255,255,255,0.7);display:flex;justify-content:center;align-items:center;color:red;font-weight:bold;font-size:1.5rem;">SOLD</div>' : ''}</div>
-                    <div class="item-info"><div class="item-rank" style="color:${p.color}">${p.rank}賞</div><div class="item-name">${p.name}</div><div class="item-desc">${p.desc}</div></div>
-                    <div class="item-status"><span class="status-badge">${count===0 ? '終了' : '残り '+count}</span></div>
+                    <div class="item-img-box"><img src="${p.img}" style="width:100%;height:100%;object-fit:cover;">${remains===0?'<div style="position:absolute;inset:0;background:rgba(255,255,255,0.7);display:flex;justify-content:center;align-items:center;color:red;font-weight:900;font-size:2rem;">SOLD OUT</div>':''}</div>
+                    <div class="item-info">
+                        <b style="font-size:1.8rem; color:var(--rank-${p.rank.toLowerCase()})">${p.rank}賞</b>
+                        <div style="font-weight:900; font-size:1.4rem; margin:5px 0;">${p.name}</div>
+                        <div style="color:#666; font-size:0.95rem; margin-bottom:15px;">${p.desc}</div>
+                        <div style="font-weight:bold; background:#eee; display:inline-block; padding:5px 15px; border-radius:20px;">残り: ${remains}</div>
+                    </div>
                 `;
                 list.appendChild(item);
             });
@@ -376,68 +265,58 @@
             }
         }
 
-        // --- 抽選ロジック ---
-        function prepareLottery() {
+        function openLottery() {
             if(lotteryBox.length === 0) return;
-            currentPrize = lotteryBox.shift();
-            updateStatus(); renderLineup();
-
             const modal = document.getElementById('lottery-modal');
-            const selectionContainer = document.getElementById('selection-container');
-            const selectTitle = document.getElementById('select-title');
-            
+            const container = document.getElementById('selection-container');
             document.getElementById('result-container').style.display = 'none';
             document.getElementById('god-rays').style.display = 'none';
-            selectionContainer.innerHTML = '';
-            selectionContainer.style.display = 'flex';
-            selectTitle.style.display = 'block';
+            document.getElementById('modal-title').style.display = 'block';
+            container.style.display = 'flex';
+            container.innerHTML = '';
 
             for(let i=0; i<5; i++) {
-                const ticket = document.createElement('div');
-                ticket.className = 'mystery-ticket';
-                ticket.style.backgroundImage = `url('${cardBackImageUrl}')`;
-                ticket.onclick = function() { selectTicket(this); };
-                selectionContainer.appendChild(ticket);
+                const card = document.createElement('div');
+                card.className = 'mystery-ticket';
+                card.style.backgroundImage = `url('${cardBackImg}')`;
+                card.onclick = () => selectCard(card);
+                container.appendChild(card);
             }
-
             modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('is-open'), 10);
+            setTimeout(() => modal.style.opacity = '1', 10);
         }
 
-        function selectTicket(el) {
-            const tickets = document.querySelectorAll('.mystery-ticket');
-            tickets.forEach(t => { if(t !== el) t.classList.add('is-faded'); });
+        function selectCard(el) {
+            const cards = document.querySelectorAll('.mystery-ticket');
+            cards.forEach(c => { if(c !== el) c.classList.add('is-faded'); });
             el.classList.add('is-selected');
-            document.getElementById('select-title').style.display = 'none';
-
-            setTimeout(() => { executeLottery(); }, 800);
-        }
-
-        function executeLottery() {
-            const flash = document.getElementById('flash-overlay');
-            const resultBox = document.getElementById('result-container');
-            const rays = document.getElementById('god-rays');
-            const selection = document.getElementById('selection-container');
-
-            flash.classList.add('do-explode');
-            setTimeout(() => flash.classList.remove('do-explode'), 800);
+            document.getElementById('modal-title').style.display = 'none';
+            currentPrize = lotteryBox.shift();
 
             setTimeout(() => {
-                selection.style.display = 'none'; 
-                const rankEl = document.getElementById('result-rank');
-                rankEl.innerText = currentPrize.rank + "賞";
-                rankEl.className = `result-rank rank-${currentPrize.rank}`;
-                document.getElementById('result-img').src = currentPrize.img;
-                document.getElementById('result-name').innerText = currentPrize.name;
-                rays.style.display = 'block';
-                resultBox.style.display = 'block';
-            }, 300);
+                document.getElementById('flash-overlay').classList.add('do-flash');
+                setTimeout(() => {
+                    document.getElementById('selection-container').style.display = 'none';
+                    document.getElementById('flash-overlay').classList.remove('do-flash');
+                    const r = document.getElementById('result-rank');
+                    r.innerText = currentPrize.rank + "賞";
+                    r.className = `result-rank rank-${currentPrize.rank}`;
+                    document.getElementById('result-img').src = currentPrize.img;
+                    document.getElementById('result-name').innerText = currentPrize.name;
+                    document.getElementById('result-container').style.display = 'block';
+                    document.getElementById('god-rays').style.display = 'block';
+                }, 200);
+            }, 800);
         }
 
-        function closeLotteryModal() {
+        function closeLottery() {
             const modal = document.getElementById('lottery-modal');
-            modal.classList.remove('is-open');
-            setTimeout(() => modal.style.display = 'none', 300);
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                renderLineup();
+                updateStatus();
+            }, 300);
         }
     </script>
 </body>
