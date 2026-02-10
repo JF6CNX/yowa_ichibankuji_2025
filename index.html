@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>よわ１番くじ ONLINE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700;900&family=Noto+Sans+JP:wght@500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <style>
+        :root {
+            --primary: #E60012; --text-main: #333; --bg-body: #FAFAFA;
+            --rank-s: #9610f0; --rank-a: #E60012; --rank-b: #0078D7; --rank-c: #009E25; --rank-d: #FF9800;
+            --font-jp: 'Noto Sans JP', sans-serif; --font-en: 'Roboto', sans-serif; --gold: #D4AF37;
+        }
+        body { font-family: var(--font-jp); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding-bottom: 140px; overflow-x: hidden; }
+        * { box-sizing: border-box; }
+        img { width: 100%; display: block; }
+        button { cursor: pointer; outline: none; border: none; font-family: inherit; }
+        a { text-decoration: none; color: inherit; }
+
+        /* スプラッシュ */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .splash-logo { width: 60%; max-width: 500px; opacity: 0; animation: fadeUp 0.8s forwards; }
+        #splash-screen.is-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 誕生日おめでとうモーダル */
+        #birthday-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 10000;
+            display: none; justify-content: center; align-items: center; text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        .birthday-content {
+            background: white; padding: 40px 20px; border-radius: 20px;
+            max-width: 90%; width: 420px; position: relative;
+            box-shadow: 0 0 30px rgba(255,217,61,0.5);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .birthday-title { font-size: 2.2rem; color: var(--primary); margin-bottom: 15px; font-weight: 900; letter-spacing: 1px; }
+        .birthday-text { font-size: 1.15rem; line-height: 1.8; margin-bottom: 25px; font-weight: 700; color: #444; }
+        .btn-birthday-close {
+            background: linear-gradient(135deg, #FFD93D, #FF6B6B);
+            color: white; padding: 15px 50px; border-radius: 40px;
+            font-weight: 900; font-size: 1.2rem; box-shadow: 0 4px 15px rgba(255,107,107,0.3);
+            transition: 0.3s;
+        }
+        .btn-birthday-close:hover { transform: scale(1.05); }
+        .confetti { position: fixed; pointer-events: none; z-index: 10001; font-size: 30px; }
+
+        /* カスタム確認モーダル */
+        #custom-confirm-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 11000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .confirm-card {
+            background: #fff; padding: 35px 25px; border-radius: 24px; 
+            width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            animation: popIn 0.3s ease-out;
+        }
+        .confirm-msg { font-weight: 900; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; color: #333; }
+        .confirm-btns { display: flex; gap: 15px; justify-content: center; }
+        .btn-cancel { background: #f0f0f0; color: #666; padding: 14px 20px; border-radius: 30px; font-weight: bold; flex: 1; transition: 0.2s; }
+        .btn-go { background: var(--primary); color: #fff; padding: 14px 20px; border-radius: 30px; font-weight: 900; flex: 1; font-size: 1.1rem; transition: 0.2s; }
+        .btn-go:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+        /* ヘッダー */
+        header { width: 100%; background: #000; }
+        .main-title-section { text-align: center; padding: 40px 20px; background: #fff; }
+        .main-title { font-family: var(--font-en); font-size: 3rem; font-weight: 900; color: var(--primary); margin-bottom: 10px; }
+        .sub-title { font-family: var(--font-jp); font-size: 1.5rem; font-weight: 700; color: var(--text-main); }
+
+        /* コンテナ */
+        .container { max-width: 1100px; margin: 0 auto; padding: 60px 20px; }
+        .section-title { text-align: center; font-family: var(--font-en); font-size: 2.2rem; font-weight: 900; margin-bottom: 50px; position: relative; padding-bottom: 15px; }
+        .section-title::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 50px; height: 4px; background: var(--primary); }
+
+        /* INFORMATION */
+        .about-section { max-width: 800px; margin: 0 auto 30px; text-align: center; }
+        .about-text { 
+            text-align: left; background: white; padding: 30px; border-radius: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0;
+        }
+        .about-text p { margin: 10px 0; line-height: 1.6; }
+
+        /* お菓子ボタン演出 */
+        .snack-section { text-align: center; margin-bottom: 60px; position: relative; min-height: 150px; }
+        .btn-snack {
+            position: relative; background: linear-gradient(135deg, #FF6B6B, #FFD93D); color: #fff;
+            padding: 18px 45px; border-radius: 50px; font-weight: 900; font-size: 1.2rem;
+            box-shadow: 0 6px 20px rgba(255,107,107,0.4); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 10;
+        }
+        .btn-snack:hover:not(:disabled) { transform: scale(1.08) rotate(-1deg); }
+        .btn-snack:active:not(:disabled) { transform: scale(0.92); }
+        .btn-snack:disabled { background: #ccc !important; box-shadow: none; cursor: not-allowed; opacity: 0.7; }
+        .snack-particle { position: absolute; pointer-events: none; font-size: 45px; z-index: 5; user-select: none; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+        #snack-message { margin-top: 15px; font-weight: 900; color: var(--primary); min-height: 2.5rem; transition: 0.3s; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
+
+        /* GALLERY (Swiper) */
+        .gallery-container { width: 100%; overflow: hidden; }
+        .swiper { width: 100%; padding: 40px 0 60px; }
+        .swiper-slide { 
+            background: #fff; width: 300px; height: 300px; border-radius: 15px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); overflow: hidden; position: relative; 
+        }
+        .gallery-badge { position: absolute; top: 0; left: 0; background: var(--primary); color: white; padding: 6px 15px; font-weight: 900; z-index: 10; border-bottom-right-radius: 15px; font-size: 0.9rem; }
+        .swiper-slide img { width: 100%; height: 100%; object-fit: cover; }
+        .swiper-button-next, .swiper-button-prev { color: var(--primary) !important; }
+
+        /* LINEUP */
+        .lineup-list { display: flex; flex-direction: column; gap: 30px; }
+        .lineup-item { display: flex; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-left: 10px solid #eee; transition: 0.3s; }
+        .lineup-item[data-rank="S"] { border-left-color: var(--rank-s); }
+        .lineup-item[data-rank="A"] { border-left-color: var(--rank-a); }
+        .lineup-item[data-rank="B"] { border-left-color: var(--rank-b); }
+        .lineup-item[data-rank="C"] { border-left-color: var(--rank-c); }
+        .lineup-item[data-rank="D"] { border-left-color: var(--rank-d); }
+        .item-img-box { width: 300px; height: 300px; flex-shrink: 0; position: relative; background: #f9f9f9; }
+        .item-info { flex: 1; padding: 30px; }
+        .is-soldout { opacity: 0.5; filter: grayscale(1); }
+
+        /* 共通パーツ */
+        .btn-external-wrap { text-align: center; margin: 60px 0; }
+        .btn-external { display: inline-block; padding: 20px 80px; background: #111; color: #fff; border-radius: 50px; font-weight: bold; transition: 0.3s; }
+        .btn-external:hover { background: var(--primary); transform: translateY(-3px); }
+        .play-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 600px; background: rgba(255,255,255,0.98); backdrop-filter: blur(8px); padding: 15px 40px; border-radius: 60px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3); z-index: 1000; }
+        .btn-draw { background: linear-gradient(135deg, #FF6B6B, #E60012); color: white; padding: 15px 50px; border-radius: 30px; font-weight: 900; font-size: 1.2rem; box-shadow: 0 5px 15px rgba(230,0,18,0.4); transition: 0.3s; }
+        .btn-draw:disabled { background: #999; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        /* 抽選モーダル */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.is-open { opacity: 1; }
+        .god-rays { display: none; position: absolute; width: 250vmax; height: 250vmax; background: repeating-conic-gradient(from 0deg, rgba(255,255,255,0.1) 0deg 10deg, transparent 10deg 20deg); animation: rotateRays 30s linear infinite; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; z-index: 5; }
+        .god-rays.is-active { opacity: 1; }
+        .god-rays.lucky-active { background: repeating-conic-gradient(from 0deg, rgba(255, 215, 0, 0.3) 0deg 10deg, transparent 10deg 20deg); }
+
+        @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .explosion-flash { position: absolute; top:0; left:0; width:100%; height:100%; background:#fff; opacity:0; pointer-events:none; z-index:100; }
+        .do-flash { animation: flashAnim 0.4s ease-out forwards; }
+        @keyframes flashAnim { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+
+        .selection-container { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; z-index: 10; }
+        .mystery-ticket {
+            width: 100px;
+            height: 160px;
+            background-color: #fff;
+            background-size: auto 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .mystery-ticket.is-selected { transform: scale(1.6) rotateY(720deg); z-index: 100; border-color: #fff; }
+        .mystery-ticket.is-faded { opacity: 0; transform: scale(0); pointer-events: none; }
+        #result-container { display: none; text-align: center; color: #fff; z-index: 50; }
+        .result-rank { font-family: var(--font-en); font-size: 7rem; font-weight: 900; margin: 0; text-shadow: 0 0 30px currentColor; }
+        .rank-S { color: var(--rank-s); } .rank-A { color: var(--rank-a); } .rank-B { color: var(--rank-b); } .rank-C { color: var(--rank-c); } .rank-D { color: var(--rank-d); }
+
+        @media (max-width: 768px) {
+            .main-title { font-size: 2rem; }
+            .container { padding: 40px 15px; }
+            .section-title { font-size: 1.8rem; margin-bottom: 30px; }
+            .snack-section { min-height: 180px; margin-bottom: 40px; }
+            .lineup-item { flex-direction: column; }
+            .item-img-box { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+            .item-info { padding: 20px; width: 100%; }
+            .item-info b { font-size: 1.5rem !important; }
+            .mystery-ticket { width: 65px; height: 104px; }
+            .result-rank { font-size: 4rem; }
+            .snack-particle { font-size: 35px; }
+            .swiper-slide { width: 260px; height: 260px; }
+            .btn-draw { padding: 12px 30px; font-size: 1rem; }
+            .birthday-title { font-size: 1.6rem; }
+            .birthday-text { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="birthday-modal">
+        <div class="birthday-content">
+            <div class="birthday-title">HAPPY BIRTHDAY!</div>
+            <div class="birthday-text">
+                ( ーωー)<br>
+                お誕生日おめでとうなのだ！<br>
+                今日は最高の一日にしてほしいのだー！<br><br>
+                <span style="color:var(--primary); font-size: 1.3rem;">よわ銀行券1枚を<br>プレゼントするのだ！</span>
+            </div>
+            <button class="btn-birthday-close" onclick="closeBirthday()">受け取る！</button>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal">
+        <div class="confirm-card">
+            <div id="confirm-msg-text" class="confirm-msg">くじはよわ銀行券1枚とこうかんなのだー！</div>
+            <div class="confirm-btns">
+                <button class="btn-cancel" onclick="hideConfirm()">やめる</button>
+                <button class="btn-go" onclick="startLotteryFromConfirm()">ひく</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="splash-screen">
+        <img src="pre_title.png" class="splash-logo" alt="ロゴ">
+        <div style="margin-top:20px; font-weight:bold; letter-spacing:4px; color:#999;">LOADING...</div>
+    </div>
+
+    <header>
+        <img src="title_1.png" style="width:100%;" alt="キービジュアル">
+        <div class="main-title-section">
+            <h1 class="main-title">よわ１番くじ</h1>
+            <p class="sub-title">ONLINE</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="about-section">
+            <h2 class="section-title">INFORMATION</h2>
+            <div class="about-text">
+                <p><strong>販売期間：</strong> 2026年2月5日(木) 00:00 〜 2026年2月6日(木) 00:00</p>
+                <p><strong>価格：</strong> 1回 1よわ銀行券</p>
+                <p style="margin-top:10px; font-size:0.9rem; color:#666;">よしだけ好きは集まれ！毎年一回しか引けない伝説の１番くじ。</p>
+            </div>
+        </section>
+
+        <div class="snack-section" id="snack-area">
+            <button class="btn-snack" id="snack-button" onclick="popSnacks()">🍬 よわにお菓子をあげる 🍪</button>
+            <div id="snack-message"></div>
+        </div>
+
+        <section class="gallery-container">
+            <h2 class="section-title">GALLERY</h2>
+            <div class="swiper mySwiper"><div class="swiper-wrapper" id="gallery-wrapper"></div><div class="swiper-button-next"></div><div class="swiper-button-prev"></div></div>
+        </section>
+
+        <section class="detail-list-section">
+            <h2 class="section-title">LINEUP</h2>
+            <div id="lineup-list" class="lineup-list"></div>
+        </section>
+
+        <div class="btn-external-wrap"><a href="https://harukanndorath.wixsite.com/my-site-2/about" target="_blank" class="btn-external" style="display:inline-block; padding:20px 80px; background:#111; color:#fff; border-radius:50px; font-weight:bold;">よわ美術館へ</a></div>
+    </div>
+
+    <div class="play-bar">
+        <div style="font-weight:bold;">残り:<span id="total-remaining" style="color:var(--primary);font-size:1.8rem; margin-left:5px;">0</span>枚</div>
+        <button id="draw-btn" class="btn-draw" onclick="showConfirm()">くじを引く</button>
+    </div>
+
+    <div id="lottery-modal" class="modal-overlay">
+        <div id="flash-overlay" class="explosion-flash"></div>
+        <div id="god-rays" class="god-rays"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;width:100%;">
+            <h2 id="modal-title" style="color:#fff;margin-bottom:40px;font-size:2rem;z-index:10;">CHOOSE ONE!</h2>
+            <div id="selection-container" class="selection-container"></div>
+            <div id="result-container">
+                <p class="result-rank" id="result-rank">S</p>
+                <img id="result-img" src="" style="width:280px;height:280px;object-fit:contain;margin:20px auto;filter:drop-shadow(0 0 20px rgba(255,255,255,0.5));">
+                <h3 id="result-name" style="font-size:1.8rem;margin-bottom:40px;">景品名</h3>
+                <button onclick="closeLottery()" style="background:#fff;color:#000;padding:15px 60px;border-radius:40px;font-weight:bold;font-size:1.2rem;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const prizeData = [
+            { rank: 'S', name: 'ガチフィギュア', count: 1, img: 'rank_S.png', desc: '夢の3D顕現!財布は死ぬけどおもろいのでおっけー' },
+            { rank: 'A', name: 'コースター', count: 2, img: 'rank_A.png', desc: '研究室のコーヒーブレイクに癒しを！' },
+            { rank: 'B', name: 'アクリルキーホルダー', count: 4, img: 'rank_B.png', desc: '今年はおちびどす' },
+            { rank: 'C', name: 'ファイル', count: 12, img: 'rank_C.png', desc: '日常使いに最適なA4サイズ' },
+            { rank: 'D', name: '缶バッジ', count: 24, img: 'rank_D.png', desc: '集めて君もコレクター！' }
+        ];
+
+        let lotteryBox = [], snackCount = 0, drawnCount = 0, canDrawExtra = false;
+
+        window.addEventListener('load', () => {
+            setTimeout(() => { document.getElementById('splash-screen').classList.add('is-hidden'); showBirthday(); init(); }, 1000);
+        });
+
+        function showBirthday() {
+            document.getElementById('birthday-modal').style.display = 'flex';
+            for(let i=0; i<30; i++) setTimeout(createConfetti, i * 100);
+        }
+        function createConfetti() {
+            const icons = ['🎂', '🎉', '✨', '🎈', '🎊'];
+            const p = document.createElement('div'); p.className = 'confetti'; p.innerText = icons[Math.floor(Math.random() * icons.length)];
+            p.style.left = Math.random() * 100 + 'vw'; p.style.top = '-50px'; document.body.appendChild(p);
+            p.animate([{ transform: `translateY(0) rotate(0deg)`, opacity: 1 }, { transform: `translateY(110vh) rotate(720deg)`, opacity: 0 }], { duration: 3000 }).onfinish = () => p.remove();
+        }
+        function closeBirthday() { document.getElementById('birthday-modal').style.display = 'none'; }
+
+        function showConfirm() {
+            const msgEl = document.getElementById('confirm-msg-text');
+            if (drawnCount === 0) {
+                msgEl.innerText = "よわ銀行券1枚を消費して\nくじを一回引く？";
+            } else if (drawnCount === 1 && canDrawExtra) {
+                msgEl.innerText = "( ーωー)<お菓子をくれたお礼なのだ！\nもう一回ひいていいよっ";
+            } else { return; }
+            document.getElementById('custom-confirm-modal').style.display = 'flex';
+        }
+        function hideConfirm() { document.getElementById('custom-confirm-modal').style.display = 'none'; }
+        function startLotteryFromConfirm() {
+            hideConfirm();
+            openLottery();
+        }
+
+        function init() {
+            lotteryBox = []; prizeData.forEach(p => { for(let i=0; i<p.count; i++) lotteryBox.push({...p}); });
+            shuffle(lotteryBox); renderGallery(); renderLineup(); updateStatus();
+        }
+        function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
+
+        function popSnacks() {
+            snackCount++;
+            const area = document.getElementById('snack-area'), msg = document.getElementById('snack-message');
+            const icons = ['🍬', '🍭', '🍫', '🍪', '🍩'];
+            const messages = ["( ーωー)<うみゃ！", "( ーωー)<もぐもぐ", "( ーωー)<あといっこほしいのだー", "( ーωー)<おちびもたべる？", "( ーωー)<ぬーん"];
+            for (let i = 0; i < 12; i++) {
+                const p = document.createElement('span'); p.className = 'snack-particle'; p.innerText = icons[Math.floor(Math.random() * icons.length)];
+                p.style.left = '50%'; p.style.top = '40%'; area.appendChild(p);
+                const angle = Math.random() * Math.PI * 2, vel = 160 + Math.random() * 200;
+                p.animate([{ transform: 'translate(-50%, -50%) scale(0) rotate(0deg)', opacity: 1 }, { transform: `translate(calc(-50% + ${Math.cos(angle)*vel}px), calc(-50% + ${Math.sin(angle)*vel}px)) scale(1.3) rotate(${Math.random()*360}deg)`, opacity: 0 }], { duration: 1000, easing: 'cubic-bezier(0.1, 0.5, 0.5, 1)', fill: 'forwards' }).onfinish = () => p.remove();
+            }
+            if (snackCount < 10) { msg.innerText = messages[Math.floor(Math.random() * messages.length)]; }
+            else { 
+                document.getElementById('snack-button').disabled = true;
+                msg.innerText = "( ーωー)<満腹なのだー！もう1回引いていいよう";
+                msg.style.color = "#E60012"; canDrawExtra = true; updateStatus();
+            }
+        }
+
+        function renderGallery() {
+            const wrapper = document.getElementById('gallery-wrapper'); wrapper.innerHTML = '';
+            let displayItems = []; while(displayItems.length < 10) displayItems = [...displayItems, ...prizeData];
+            displayItems.forEach(p => {
+                const slide = document.createElement('div'); slide.className = 'swiper-slide';
+                slide.innerHTML = `<div class="gallery-badge" style="background:var(--rank-${p.rank.toLowerCase()})">${p.rank}賞</div><img src="${p.img}" alt="${p.name}">`;
+                wrapper.appendChild(slide);
+            });
+            new Swiper('.mySwiper', { effect: 'coverflow', centeredSlides: true, slidesPerView: 'auto', loop: true, autoplay: { delay: 3000, disableOnInteraction: false }, coverflowEffect: { rotate: 20, stretch: 0, depth: 100, modifier: 1.5, slideShadows: true }, navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' } });
+        }
+
+        function renderLineup() {
+            const list = document.getElementById('lineup-list'); list.innerHTML = '';
+            prizeData.forEach(p => {
+                const remains = lotteryBox.filter(x => x.rank === p.rank).length;
+                const item = document.createElement('div'); item.className = `lineup-item ${remains === 0 ? 'is-soldout' : ''}`;
+                item.dataset.rank = p.rank;
+                item.innerHTML = `<div class="item-img-box"><img src="${p.img}" alt="${p.name}">${remains === 0 ? '<div style="position:absolute;inset:0;background:rgba(255,255,255,0.7);display:flex;justify-content:center;align-items:center;color:red;font-weight:900;font-size:2rem;">SOLD OUT</div>' : ''}</div><div class="item-info"><b style="font-size:1.8rem; color:var(--rank-${p.rank.toLowerCase()})">${p.rank}賞</b><div style="font-weight:900; font-size:1.4rem; margin:5px 0;">${p.name}</div><div style="color:#666; font-size:0.95rem; margin-bottom:15px;">${p.desc}</div><div style="font-weight:bold; background:#eee; display:inline-block; padding:5px 15px; border-radius:20px;">残り: ${remains}</div></div>`;
+                list.appendChild(item);
+            });
+        }
+
+        function updateStatus() {
+            document.getElementById('total-remaining').innerText = lotteryBox.length;
+            const drawBtn = document.getElementById('draw-btn');
+            if(lotteryBox.length === 0) { drawBtn.disabled = true; drawBtn.innerText = "完売"; return; }
+            if (drawnCount === 0) { drawBtn.disabled = false; drawBtn.innerText = "くじを引く"; }
+            else if (drawnCount === 1) {
+                if (canDrawExtra) { drawBtn.disabled = false; drawBtn.innerText = "特別なのだ！"; }
+                else { drawBtn.disabled = true; drawBtn.innerText = "おわり？\n（よわにお菓子をあげると…？）"; }
+            } else { drawBtn.disabled = true; drawBtn.innerText = "おわり！"; }
+        }
+
+        function openLottery() {
+            if(lotteryBox.length === 0) return;
+            const modal = document.getElementById('lottery-modal');
+            const selectionContainer = document.getElementById('selection-container');
+            const rays = document.getElementById('god-rays');
+
+            // 幸運タイム(3:33)判定と演出
+            const now = new Date();
+            if(now.getHours() === 3 && now.getMinutes() === 33) {
+                rays.classList.add('lucky-active');
+            } else {
+                rays.classList.remove('lucky-active');
+            }
+
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('modal-title').style.display = 'block';
+            selectionContainer.style.display = 'flex'; selectionContainer.innerHTML = '';
+            for(let i=0; i<5; i++) {
+                const card = document.createElement('div'); card.className = 'mystery-ticket'; card.style.backgroundImage = "url('card.png')";
+                card.onclick = () => selectCard(card); selectionContainer.appendChild(card);
+            }
+            modal.style.display = 'flex';
+            setTimeout(() => { modal.classList.add('is-open'); rays.style.display = 'block'; setTimeout(() => rays.classList.add('is-active'), 50); }, 10);
+        }
+
+        function selectCard(el) {
+            const cards = document.querySelectorAll('.mystery-ticket');
+            cards.forEach(c => { if(c !== el) c.classList.add('is-faded'); });
+            el.classList.add('is-selected'); 
+            document.getElementById('modal-title').style.display = 'none'; 
+            drawnCount++;
+
+            // 幸運タイム(3:33)ロジック
+            const now = new Date();
+            const isLuckyTime = (now.getHours() === 3 && now.getMinutes() === 33);
+            let prize;
+            if (isLuckyTime) {
+                const sIndex = lotteryBox.findIndex(p => p.rank === 'S');
+                if (sIndex !== -1) {
+                    prize = lotteryBox.splice(sIndex, 1)[0];
+                } else {
+                    prize = lotteryBox.shift();
+                }
+            } else {
+                prize = lotteryBox.shift();
+            }
+
+            // --- Discord通知 ---
+            const discordWebhookUrl = "https://discord.com/api/webhooks/1468619244072865923/AnK34K0R2JSRo_iviM7PwAhJbenC-3N1HSe-uXbi9N-3voA5vhAERS6EkUQbI_2V5mNi";
+            if (discordWebhookUrl.startsWith("https://discord.com/api/webhooks/")) {
+                fetch(discordWebhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: "よわ１番くじ",
+                        content: "🎉 **くじが引かれたのだ！**",
+                        embeds: [{
+                            title: "当選結果",
+                            color: 15133696,
+                            fields: [
+                                { name: "ランク", value: prize.rank + "賞", inline: true },
+                                { name: "景品名", value: prize.name, inline: true }
+                            ],
+                            timestamp: new Date().toISOString()
+                        }]
+                    })
+                }).catch(e => console.error("通知失敗:", e));
+            }
+
+            setTimeout(() => {
+                document.getElementById('flash-overlay').classList.add('do-flash');
+                setTimeout(() => {
+                    document.getElementById('selection-container').style.display = 'none';
+                    document.getElementById('flash-overlay').classList.remove('do-flash');
+                    const rankEl = document.getElementById('result-rank');
+                    rankEl.innerText = prize.rank + "賞"; rankEl.className = `result-rank rank-${prize.rank}`;
+                    document.getElementById('result-img').src = prize.img;
+                    document.getElementById('result-name').innerText = prize.name;
+                    document.getElementById('result-container').style.display = 'block';
+                }, 400);
+            }, 800);
+        }
+
+        function closeLottery() {
+            const modal = document.getElementById('lottery-modal');
+            modal.classList.remove('is-open');
+            setTimeout(() => { modal.style.display = 'none'; renderLineup(); updateStatus(); }, 300);
+        }
+    </script>
+</body>
+</html>
